@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-Player Ludo Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 400px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .player {
+            text-align: center;
+            width: 45%;
+        }
+
+        .player h2 {
+            font-size: 1.5em;
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .player span {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .highlight {
+            color: #ffb300;
+            font-weight: bold;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .player1-avatar {
+            background-color: red;
+        }
+
+        .player2-avatar {
+            background-color: blue;
+        }
+
+        /* Ludo Board */
+        .ludo-board {
+            display: grid;
+            grid-template-columns: repeat(5, 70px);
+            grid-template-rows: repeat(5, 70px);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .ludo-cell {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            border-radius: 10px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .ludo-cell.start {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .ludo-cell.finish {
+            background-color: #004d00;
+            color: #fff;
+        }
+
+        /* Player Tokens */
+        .player-token {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .player1-token {
+            background-color: red;
+        }
+
+        .player2-token {
+            background-color: blue;
+        }
+
+        .player-token:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        /* Dice Area */
+        .dice-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .dice {
+            width: 90px;
+            height: 90px;
+            font-size: 3em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .dice:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+
+        .turn {
+            font-size: 1.5em;
+            color: #333;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 1.5em;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        .game-over {
+            color: #d9534f;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Killed Token Message on Board */
+        .killed-message {
+            color: #e74c3c;
+            font-size: 1.2em;
+            font-weight: bold;
+            position: absolute;
+            z-index: 10;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            animation: pop-up 1s ease-out;
+        }
+
+        @keyframes pop-up {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .game-container {
+                width: 90%;
+            }
+
+            .ludo-board {
+                grid-template-columns: repeat(4, 70px);
+                grid-template-rows: repeat(4, 70px);
+            }
+
+            .dice {
+                width: 80px;
+                height: 80px;
+            }
+
+            .btn {
+                font-size: 1.2em;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>2-Player Ludo Game</h1>
+
+        <!-- Player Info -->
+        <div class="player-info">
+            <div class="player" id="player1">
+                <div class="avatar player1-avatar"></div>
+                <h2>Player 1</h2>
+                <span id="player1-score">0</span>
+            </div>
+            <div class="player" id="player2">
+                <div class="avatar player2-avatar"></div>
+                <h2>Player 2</h2>
+                <span id="player2-score">0</span>
+            </div>
+        </div>
+
+        <!-- Ludo Board -->
+        <div class="ludo-board" id="board"></div>
+
+        <!-- Tokens -->
+        <div id="player1-token" class="player-token player1-token">
+            1
+        </div>
+        <div id="player2-token" class="player-token player2-token">
+            2
+        </div>
+
+        <!-- Dice Area -->
+        <div class="dice-area">
+            <div class="dice" id="dice" onclick="rollDice()">🎲</div>
+            <div class="turn" id="turn">Player 1's Turn</div>
+        </div>
+
+        <!-- Killed Token Message Below Players Block -->
+        <div class="killed-message-container">
+            <div id="killed-message" class="killed-message"></div>
+        </div>
+
+        <!-- Game Over Message -->
+        <div id="game-over-message" class="game-over" style="display: none;"></div>
+
+        <!-- Play Again Button -->
+        <button id="play-again-btn" class="btn" style="display: none;" onclick="playAgain()">Play Again</button>
+    </div>
+
+    <script>
+        const boardSize = 5;
+        const boardCells = [];
+        const positions = { 1: 0, 2: 0 };
+        const playerTokens = {
+            1: document.getElementById('player1-token'),
+            2: document.getElementById('player2-token')
+        };
+        let currentPlayer = 1;
+        let diceScore = { 1: 0, 2: 0 };
+
+        function createBoard() {
+            const board = document.getElementById('board');
+            let cellCount = 0;
+
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('ludo-cell');
+                    cell.id = `cell-${cellCount}`;
+                    boardCells.push(cell);
+
+                    if (cellCount === 0) {
+                        cell.classList.add('start');
+                        cell.innerText = 'Start';
+                    } else if (cellCount === boardSize * boardSize - 1) {
+                        cell.classList.add('finish');
+                        cell.innerText = 'Finish';
+                    }
+
+                    board.appendChild(cell);
+                    cellCount++;
+                }
+            }
+            updateTokenPositions();
+        }
+
+        function rollDice() {
+            if (currentPlayer === 1 && document.getElementById('game-over-message').style.display === 'none') {
+                const diceRoll = Math.ceil(Math.random() * 6);
+                document.getElementById('dice').innerText = diceRoll;
+                animateDice();
+                movePlayer(currentPlayer, diceRoll);
+                diceScore[1] = diceRoll;
+            } else if (currentPlayer === 2 && document.getElementById('game-over-message').style.display === 'none') {
+                const diceRoll = Math.ceil(Math.random() * 6);
+                document.getElementById('dice').innerText = diceRoll;
+                animateDice();
+                movePlayer(currentPlayer, diceRoll);
+                diceScore[2] = diceRoll;
+            }
+            updateScore();
+        }
+
+        function animateDice() {
+            const dice = document.getElementById('dice');
+            dice.style.animation = 'rolling 1s infinite';
+            setTimeout(() => {
+                dice.style.animation = '';
+            }, 1000); // Dice rolling effect for 1 second
+        }
+
+        function movePlayer(player, steps) {
+            let newPosition = positions[player] + steps;
+
+            // Check for exact finish condition
+            if (newPosition > boardCells.length - 1) {
+                newPosition = positions[player]; // Prevent overshooting
+            }
+
+            // Check for "killing" the opponent's token
+            const opponent = player === 1 ? 2 : 1;
+            if (newPosition === positions[opponent]) {
+                // Send opponent back to start
+                positions[opponent] = 0;
+                updateTokenPositions();
+
+                // Show killed message on board
+                showKilledMessage(opponent, positions[opponent]);
+            }
+
+            positions[player] = newPosition;
+            updateTokenPositions();
+
+            // Check for winner
+            if (positions[player] === boardCells.length - 1) {
+                gameOver(player);
+                return;
+            }
+
+            // Switch turn
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            document.getElementById('turn').innerText = `Player ${currentPlayer}'s Turn`;
+            document.getElementById(`player${currentPlayer}`).classList.add('highlight');
+            document.getElementById(`player${player}`).classList.remove('highlight');
+        }
+
+        function updateTokenPositions() {
+            // Update Player 1 position
+            playerTokens[1].style.left = `${boardCells[positions[1]].offsetLeft + 15}px`;
+            playerTokens[1].style.top = `${boardCells[positions[1]].offsetTop + 15}px`;
+
+            // Update Player 2 position
+            playerTokens[2].style.left = `${boardCells[positions[2]].offsetLeft + 15}px`;
+            playerTokens[2].style.top = `${boardCells[positions[2]].offsetTop + 15}px`;
+        }
+
+        function showKilledMessage(player, newPos) {
+            const killedMessage = document.getElementById('killed-message');
+            killedMessage.innerText = `Player ${player} Token Killed!`;
+            const cell = document.getElementById(`cell-${newPos}`);
+
+            killedMessage.style.display = 'block';
+
+            const cellRect = cell.getBoundingClientRect();
+            killedMessage.style.top = `${cellRect.top + window.scrollY - 25}px`;
+            killedMessage.style.left = `${cellRect.left + window.scrollX + (cellRect.width / 2) - (killedMessage.offsetWidth / 2)}px`;
+
+            setTimeout(() => {
+                killedMessage.style.display = 'none';
+            }, 2000);
+        }
+
+        function updateScore() {
+            document.getElementById('player1-score').innerText = positions[1];
+            document.getElementById('player2-score').innerText = positions[2];
+        }
+
+        function gameOver(winner) {
+            document.getElementById('game-over-message').innerText = `Player ${winner} wins!`;
+            document.getElementById('game-over-message').style.display = 'block';
+            document.getElementById('play-again-btn').style.display = 'block';
+        }
+
+        function playAgain() {
+            positions[1] = 0;
+            positions[2] = 0;
+            currentPlayer = 1;
+            updateTokenPositions();
+            document.getElementById('game-over-message').style.display = 'none';
+            document.getElementById('play-again-btn').style.display = 'none';
+            updateScore();
+            document.getElementById('turn').innerText = `Player 1's Turn`;
+            document.getElementById('player1').classList.add('highlight');
+            document.getElementById('player2').classList.remove('highlight');
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
